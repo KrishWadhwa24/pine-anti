@@ -314,7 +314,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleGetSignals(w http.ResponseWriter, r *http.Request) {
 	tf := r.URL.Query().Get("timeframe")
 	category := r.URL.Query().Get("category")
-	signals, err := s.signalPipeline.GetRecentSignals(r.Context(), 50, tf, category)
+	signals, err := s.signalPipeline.GetRecentSignals(r.Context(), 0, tf, category)
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -524,7 +524,11 @@ func (s *Server) handleSearchSymbols(w http.ResponseWriter, r *http.Request) {
 
 // ━━━ Scanners ━━━
 func (s *Server) handleGetScannerResults(w http.ResponseWriter, r *http.Request) {
-	cursor, err := s.mongoStore.ManualScannerResults().Find(r.Context(), bson.M{"matched": true}, options.Find().SetSort(bson.M{"createdAt": -1}))
+	filter := bson.M{
+		"matched":   true,
+		"createdAt": bson.M{"$gte": time.Now().Add(-7 * 24 * time.Hour)},
+	}
+	cursor, err := s.mongoStore.ManualScannerResults().Find(r.Context(), filter, options.Find().SetSort(bson.M{"createdAt": -1}))
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return

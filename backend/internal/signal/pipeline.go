@@ -93,9 +93,11 @@ func (p *Pipeline) Process(ctx context.Context, signal models.Signal) error {
 	return nil
 }
 
-// GetRecentSignals returns the most recent signals.
+// GetRecentSignals returns the most recent signals within the last 7 days.
 func (p *Pipeline) GetRecentSignals(ctx context.Context, limit int, timeframe, category string) ([]models.Signal, error) {
-	filter := bson.M{}
+	filter := bson.M{
+		"createdAt": bson.M{"$gte": time.Now().Add(-7 * 24 * time.Hour)},
+	}
 	if timeframe != "" {
 		filter["timeframe"] = timeframe
 	}
@@ -103,7 +105,10 @@ func (p *Pipeline) GetRecentSignals(ctx context.Context, limit int, timeframe, c
 		filter["category"] = category
 	}
 
-	opts := options.Find().SetSort(bson.M{"createdAt": -1}).SetLimit(int64(limit))
+	opts := options.Find().SetSort(bson.M{"createdAt": -1})
+	if limit > 0 {
+		opts.SetLimit(int64(limit))
+	}
 	cursor, err := p.mongoStore.Signals().Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err

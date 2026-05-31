@@ -940,7 +940,7 @@ func periodicTasks(
 			if err := sr.Refresh(); err != nil {
 				log.Error().Err(err).Msg("Symbol master refresh failed")
 			}
-			
+
 			// Clean up 7 days old signals
 			cleanupThreshold := time.Now().AddDate(0, 0, -7)
 			res, err := ms.Signals().DeleteMany(ctx, bson.M{
@@ -962,7 +962,7 @@ func periodicTasks(
 					models.Timeframe1W: 260,
 					models.Timeframe1M: 62,
 				}
-				
+
 				var totalPruned int64
 				for _, stock := range stocks {
 					for tf, limit := range limits {
@@ -974,7 +974,7 @@ func periodicTasks(
 						}
 					}
 				}
-				
+
 				if totalPruned > 0 {
 					log.Info().Int64("prunedCount", totalPruned).Msg("Cleaned up old candles")
 				}
