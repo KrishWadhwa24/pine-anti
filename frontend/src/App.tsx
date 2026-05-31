@@ -48,7 +48,9 @@ export default function App() {
       }} />
       <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="desktop-header">
-          <button className="btn-icon" style={{ border: 'none', background: 'transparent', fontSize: 24, padding: 0 }} onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <button className="btn-icon" style={{ border: 'none', background: 'transparent', fontSize: 24, padding: 0 }} 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onMouseEnter={() => setSidebarOpen(true)}>
             ☰
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -206,7 +208,8 @@ function Sidebar({ page, setPage, isOpen, setOpen, onLogout }: { page: Page; set
   return (
     <>
       {isOpen && <div className="sidebar-overlay" style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0, 0, 0, 0.4)' }} onClick={() => setOpen(false)}></div>}
-      <aside className={`sidebar ${isOpen ? 'open' : ''}`} style={{ backgroundColor: 'rgba(18, 18, 18, 0.7)', backdropFilter: 'blur(20px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}>
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`} style={{ backgroundColor: 'rgba(18, 18, 18, 0.7)', backdropFilter: 'blur(20px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}
+        onMouseLeave={() => setOpen(false)}>
         <div className="sidebar-brand">
           <div className="sidebar-brand-icon">TN</div>
           <div className="sidebar-brand-text">TradeNexus</div>
