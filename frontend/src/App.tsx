@@ -54,13 +54,13 @@ export default function App() {
             ☰
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div className="sidebar-brand-icon" style={{ width: 28, height: 28, fontSize: 14 }}>TN</div>
+            <img src="/assets/logo.svg" alt="TradeNexus Logo" className="sidebar-brand-icon" style={{ width: 36, height: 36, background: 'transparent' }} />
             <span style={{ fontWeight: 700, fontSize: 16 }}>TradeNexus</span>
           </div>
         </div>
 
         <div className="mobile-header">
-          <div className="sidebar-brand-icon" style={{ width: 28, height: 28, fontSize: 14 }}>TN</div>
+          <img src="/assets/logo.svg" alt="TradeNexus Logo" className="sidebar-brand-icon" style={{ width: 36, height: 36, background: 'transparent' }} />
           <span style={{ fontWeight: 700, fontSize: 16 }}>TradeNexus</span>
         </div>
         {page === 'dashboard' && <DashboardPage />}
@@ -102,7 +102,7 @@ function LandingPage({ onLogin }: { onLogin: (u: string, p: string) => void }) {
     <div className="landing-page">
       <nav className="landing-nav">
         <div className="sidebar-brand" style={{ margin: 0 }}>
-          <div className="sidebar-brand-icon">TN</div>
+          <img src="/assets/logo.svg" alt="TradeNexus Logo" className="sidebar-brand-icon" style={{ width: 44, height: 44, background: 'transparent' }} />
           <div className="sidebar-brand-text">TradeNexus</div>
         </div>
         <button className="btn btn-secondary" onClick={() => setShowLogin(true)}>Sign In</button>
@@ -211,7 +211,7 @@ function Sidebar({ page, setPage, isOpen, setOpen, onLogout }: { page: Page; set
       <aside className={`sidebar ${isOpen ? 'open' : ''}`} style={{ backgroundColor: 'rgba(18, 18, 18, 0.7)', backdropFilter: 'blur(20px)', borderRight: '1px solid rgba(255, 255, 255, 0.05)' }}
         onMouseLeave={() => setOpen(false)}>
         <div className="sidebar-brand">
-          <div className="sidebar-brand-icon">TN</div>
+          <img src="/assets/logo.svg" alt="TradeNexus Logo" className="sidebar-brand-icon" style={{ width: 44, height: 44, background: 'transparent' }} />
           <div className="sidebar-brand-text">TradeNexus</div>
           <button className="btn-icon" style={{ marginLeft: 'auto', border: 'none', background: 'transparent' }} onClick={() => setOpen(false)}>✕</button>
         </div>

@@ -83,32 +83,71 @@ func (h *HistoricalClient) FetchCandles(exchange, symbolToken, interval, fromDat
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", baseURL+historicalEndpoint, bytes.NewReader(body))
-	if err != nil {
-		return nil, err
+	var resp *http.Response
+	var respBody []byte
+	maxRetries := 5
+
+	for i := 0; i < maxRetries; i++ {
+		// Rate limiting delay for each attempt
+		time.Sleep(rateLimitDelay)
+
+		req, err := http.NewRequest("POST", baseURL+historicalEndpoint, bytes.NewReader(body))
+		if err != nil {
+			return nil, err
+		}
+
+		for k, v := range headers {
+			req.Header.Set(k, v)
+		}
+
+		resp, err = h.httpClient.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("historical API request failed: %w", err)
+		}
+
+		respBody, err = io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode == http.StatusOK {
+			break // Success, exit loop
+		}
+
+		if resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusTooManyRequests {
+			log.Warn().
+				Int("status", resp.StatusCode).
+				Int("attempt", i+1).
+				Str("symbol", symbolToken).
+				Msg("Rate limit exceeded, retrying...")
+			
+			// Exponential backoff
+			backoff := time.Duration(i+1) * 2 * time.Second
+			time.Sleep(backoff)
+			continue
+		}
+
+		// Other HTTP errors, break and return error
+		break
 	}
 
-	for k, v := range headers {
-		req.Header.Set(k, v)
-	}
-
-	// Rate limiting
-	time.Sleep(rateLimitDelay)
-
-	resp, err := h.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("historical API request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if resp.StatusCode != http.StatusOK {
+		// Log a truncated version of the body if it's too long
+		bodyStr := string(respBody)
+		if len(bodyStr) > 200 {
+			bodyStr = bodyStr[:200] + "..."
+		}
+		return nil, fmt.Errorf("historical API request failed with status %d: %s", resp.StatusCode, bodyStr)
 	}
 
 	var histResp HistoricalResponse
 	if err := json.Unmarshal(respBody, &histResp); err != nil {
-		return nil, fmt.Errorf("failed to parse historical response: %w", err)
+		bodyStr := string(respBody)
+		if len(bodyStr) > 200 {
+			bodyStr = bodyStr[:200] + "..."
+		}
+		return nil, fmt.Errorf("failed to parse historical response: %w (body: %s)", err, bodyStr)
 	}
 
 	if !histResp.Status {
